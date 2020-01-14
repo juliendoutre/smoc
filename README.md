@@ -1,0 +1,2 @@
+# smoc
+SMOC project
