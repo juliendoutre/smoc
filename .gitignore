@@ -54,3 +54,21 @@ dkms.conf
 
 # Atollic
 .metadata/
+
+# STM32CubeIDE
+game_server/.cproject
+game_server/.project
+game_server/.settings/language.settings.xml
+game_server/Debug/game_server.list
+game_server/game_server.elf.launch
+game_server/.cproject_org
+game_server/.project_org
+game_server/Debug/Drivers/
+game_server/Debug/Middlewares/
+game_server/Debug/Src/
+game_server/Debug/makefile
+game_server/Debug/objects.list
+game_server/Debug/objects.mk
+game_server/Debug/sources.mk
+game_server/Debug/startup/
+game_server/game_server_converter.log
