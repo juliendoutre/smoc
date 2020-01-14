@@ -76,7 +76,20 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	switch ( recv_car )
 	{
+		case 'L' :
+			HAL_GPIO_TogglePin(GPIOD, LD5_Pin);
+			break;
+		case 'R' :
+			HAL_GPIO_TogglePin(GPIOD, LD4_Pin);
+			break;
+		case 'T' :
+			HAL_GPIO_TogglePin(GPIOD, LD6_Pin);
+			break;
+		case 'B' :
+			HAL_GPIO_TogglePin(GPIOD, LD3_Pin);
+			break;
 		case '>' :
+			// TODO: Remove this
 			HAL_GPIO_TogglePin(GPIOD, LD5_Pin);
 			break;
 		default:
