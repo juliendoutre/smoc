@@ -19,3 +19,10 @@ SMOC project
 - Server is receiving through USART3. Make sure it is correctly set up in STM32CubeMX.
 - Connect **PA2** (USART2_TX) on accelerometer to **PD9** (USART3_RX) on server.
 - Connect both accelerometer and server GND.
+
+## Access the server
+
+- Check that server is properly configured.
+- Connect to server card via ethernet.
+- Manually assign IP Adress to be on the same network than server.
+- Go to `192.168.1.10`.
