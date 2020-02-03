@@ -449,6 +449,11 @@ static void ACCELERO_ReadAcc(void)
 
   xval = buffer[0];
   yval = buffer[1];
+  char str[12];
+//  sprintf(str, "%d", (int)(xval / 20));
+  HAL_UART_Transmit(&huart2, buffer, 2, 1000);
+//  sprintf(str, "%d", (int)(yval / 20));
+//  HAL_UART_Transmit(&huart2, (int)(yval / 20), 1, 1000);
 
   if ((ABS(xval)) > (ABS(yval)))
   {

@@ -70,34 +70,64 @@ void MX_USB_HOST_Process(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-uint8_t recv_car = 0;
+int16_t buffer[3] = {0};
+int16_t ThresholdHigh = 20;
+int16_t ThresholdLow = -20;
+
+#define ABS(x) (x < 0) ? (-x) : x
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	switch ( recv_car )
+	int16_t xval, yval = 0x00;
+
+	xval = buffer[0];
+	yval = buffer[1];
+
+	if ((ABS(xval)) > (ABS(yval)))
 	{
-		case 'L' :
-			HAL_GPIO_TogglePin(GPIOD, LD5_Pin);
-			break;
-		case 'R' :
-			HAL_GPIO_TogglePin(GPIOD, LD4_Pin);
-			break;
-		case 'T' :
-			HAL_GPIO_TogglePin(GPIOD, LD6_Pin);
-			break;
-		case 'B' :
-			HAL_GPIO_TogglePin(GPIOD, LD3_Pin);
-			break;
-		case '>' :
-			// TODO: Remove this
-			HAL_GPIO_TogglePin(GPIOD, LD5_Pin);
-			break;
-		default:
-			break;
+		if (xval > ThresholdHigh)
+		{
+		  /* LED5 On */
+		  HAL_GPIO_TogglePin(GPIOD, LD5_Pin);
+		  // BSP_LED_On(LED5);
+		  HAL_Delay(10);
+		}
+		else if (xval < ThresholdLow)
+		{
+		  /* LED4 On */
+		  HAL_GPIO_TogglePin(GPIOD, LD4_Pin);
+		  // BSP_LED_On(LED4);
+		  HAL_Delay(10);
+		}
+		else
+		{
+		  HAL_Delay(10);
+		}
+	}
+	else
+	{
+		if (yval < ThresholdLow)
+		{
+		  /* LED6 On */
+		  // BSP_LED_On(LED6);
+		  HAL_GPIO_TogglePin(GPIOD, LD6_Pin);
+		  HAL_Delay(10);
+		}
+		else if (yval > ThresholdHigh)
+		{
+		  /* LED3 On */
+		  // BSP_LED_On(LED3);
+		  HAL_GPIO_TogglePin(GPIOD, LD3_Pin);
+		  HAL_Delay(10);
+		}
+		else
+		{
+		  HAL_Delay(10);
+		}
 	}
 
 	// Restart receiving data on USART3
-	HAL_UART_Receive_IT( &huart3, &recv_car, 1 );
+	HAL_UART_Receive_IT( &huart3, &buffer, 2 );
 }
 /* USER CODE END 0 */
 
@@ -137,7 +167,7 @@ int main(void)
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
   // Start receiving data on USART3
-  HAL_UART_Receive_IT( &huart3, &recv_car, 1 );
+  HAL_UART_Receive_IT( &huart3, &buffer, 2 );
 
   /* USER CODE END 2 */
 
