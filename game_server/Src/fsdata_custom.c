@@ -8,6 +8,7 @@
 #include "lwip/apps/fs.h"
 #include <string.h>
 #include "engine.h"
+#include "set_values.h"
 
 #define FS_ROOT 0
 
@@ -172,6 +173,13 @@ int fs_open_custom(struct fs_file *file, const char *name)
 		len = engine_length;
 		file->data = (char *)malloc(len + 1);
 		strcpy((char *)file->data, engine);
+	}
+	else if (strcmp(name, "/accelerometer.html") == 0)
+	{
+		char str[2000];
+		sprintf(str, "x: %d, y: %d", x, y);
+		file->data = str;
+		len = strlen(str);
 	}
 	else
 	{

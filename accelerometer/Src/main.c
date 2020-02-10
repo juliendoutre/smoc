@@ -450,8 +450,13 @@ static void ACCELERO_ReadAcc(void)
   xval = buffer[0];
   yval = buffer[1];
   char str[12];
+
+  int8_t processed_buffer[2] = {0};
+
+  processed_buffer[0] = (int8_t)(xval / 20);
+  processed_buffer[1] = (int8_t)(yval / 20);
 //  sprintf(str, "%d", (int)(xval / 20));
-  HAL_UART_Transmit(&huart2, buffer, 2, 1000);
+  HAL_UART_Transmit(&huart2, processed_buffer, 2, 1000);
 //  sprintf(str, "%d", (int)(yval / 20));
 //  HAL_UART_Transmit(&huart2, (int)(yval / 20), 1, 1000);
 
@@ -462,7 +467,7 @@ static void ACCELERO_ReadAcc(void)
       /* LED5 On */
       HAL_GPIO_TogglePin(GPIOD, LD5_Pin);
       // BSP_LED_On(LED5);
-      HAL_UART_Transmit(&huart2, "L", 1, 1000);
+//      HAL_UART_Transmit(&huart2, "L", 1, 1000);
       HAL_Delay(10);
     }
     else if (xval < ThresholdLow)
@@ -470,7 +475,7 @@ static void ACCELERO_ReadAcc(void)
       /* LED4 On */
       HAL_GPIO_TogglePin(GPIOD, LD4_Pin);
       // BSP_LED_On(LED4);
-      HAL_UART_Transmit(&huart2, "R", 1, 1000);
+//      HAL_UART_Transmit(&huart2, "R", 1, 1000);
       HAL_Delay(10);
     }
     else
@@ -485,7 +490,7 @@ static void ACCELERO_ReadAcc(void)
       /* LED6 On */
       // BSP_LED_On(LED6);
       HAL_GPIO_TogglePin(GPIOD, LD6_Pin);
-      HAL_UART_Transmit(&huart2, "T", 1, 1000);
+//      HAL_UART_Transmit(&huart2, "T", 1, 1000);
       HAL_Delay(10);
     }
     else if (yval > ThresholdHigh)
@@ -493,7 +498,7 @@ static void ACCELERO_ReadAcc(void)
       /* LED3 On */
       // BSP_LED_On(LED3);
       HAL_GPIO_TogglePin(GPIOD, LD3_Pin);
-      HAL_UART_Transmit(&huart2, "B", 1, 1000);
+//      HAL_UART_Transmit(&huart2, "B", 1, 1000);
       HAL_Delay(10);
     }
     else

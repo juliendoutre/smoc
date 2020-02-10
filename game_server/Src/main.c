@@ -70,64 +70,74 @@ void MX_USB_HOST_Process(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-int16_t buffer[3] = {0};
-int16_t ThresholdHigh = 20;
-int16_t ThresholdLow = -20;
+int8_t buffer[2] = {0};
+int8_t ThresholdHigh = 20;
+int8_t ThresholdLow = -20;
 
 #define ABS(x) (x < 0) ? (-x) : x
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	int16_t xval, yval = 0x00;
+	int8_t xval, yval = 0x00;
 
 	xval = buffer[0];
 	yval = buffer[1];
 
-	if ((ABS(xval)) > (ABS(yval)))
-	{
-		if (xval > ThresholdHigh)
-		{
-		  /* LED5 On */
-		  HAL_GPIO_TogglePin(GPIOD, LD5_Pin);
-		  // BSP_LED_On(LED5);
-		  HAL_Delay(10);
-		}
-		else if (xval < ThresholdLow)
-		{
-		  /* LED4 On */
-		  HAL_GPIO_TogglePin(GPIOD, LD4_Pin);
-		  // BSP_LED_On(LED4);
-		  HAL_Delay(10);
-		}
-		else
-		{
-		  HAL_Delay(10);
-		}
-	}
-	else
-	{
-		if (yval < ThresholdLow)
-		{
-		  /* LED6 On */
-		  // BSP_LED_On(LED6);
-		  HAL_GPIO_TogglePin(GPIOD, LD6_Pin);
-		  HAL_Delay(10);
-		}
-		else if (yval > ThresholdHigh)
-		{
-		  /* LED3 On */
-		  // BSP_LED_On(LED3);
-		  HAL_GPIO_TogglePin(GPIOD, LD3_Pin);
-		  HAL_Delay(10);
-		}
-		else
-		{
-		  HAL_Delay(10);
-		}
+	set_values(buffer);
+
+	if (ABS(xval) > 0) {
+		HAL_GPIO_TogglePin(GPIOD, LD5_Pin);
 	}
 
+	if (ABS(yval) > 0) {
+		HAL_GPIO_TogglePin(GPIOD, LD4_Pin);
+	}
+
+//	if ((ABS(xval)) > (ABS(yval)))
+//	{
+//		if (xval > ThresholdHigh)
+//		{
+//		  /* LED5 On */
+//		  HAL_GPIO_TogglePin(GPIOD, LD5_Pin);
+//		  // BSP_LED_On(LED5);
+//		  HAL_Delay(10);
+//		}
+//		else if (xval < ThresholdLow)
+//		{
+//		  /* LED4 On */
+//		  HAL_GPIO_TogglePin(GPIOD, LD4_Pin);
+//		  // BSP_LED_On(LED4);
+//		  HAL_Delay(10);
+//		}
+//		else
+//		{
+//		  HAL_Delay(10);
+//		}
+//	}
+//	else
+//	{
+//		if (yval < ThresholdLow)
+//		{
+//		  /* LED6 On */
+//		  // BSP_LED_On(LED6);
+//		  HAL_GPIO_TogglePin(GPIOD, LD6_Pin);
+//		  HAL_Delay(10);
+//		}
+//		else if (yval > ThresholdHigh)
+//		{
+//		  /* LED3 On */
+//		  // BSP_LED_On(LED3);
+//		  HAL_GPIO_TogglePin(GPIOD, LD3_Pin);
+//		  HAL_Delay(10);
+//		}
+//		else
+//		{
+//		  HAL_Delay(10);
+//		}
+//	}
+
 	// Restart receiving data on USART3
-	HAL_UART_Receive_IT( &huart3, &buffer, 2 );
+	HAL_UART_Receive_IT(&huart3, buffer, 2);
 }
 /* USER CODE END 0 */
 
