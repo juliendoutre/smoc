@@ -72,3 +72,5 @@ game_server/Debug/objects.mk
 game_server/Debug/sources.mk
 game_server/Debug/startup/
 game_server/game_server_converter.log
+
+.vscode/

@@ -1,9 +1,0 @@
-{
-    "files.associations": {
-        "mems.h": "c",
-        "set_values.h": "c",
-        "favicon.h": "c",
-        "accelerometer_handler.h": "c",
-        "stdint.h": "c"
-    }
-}
