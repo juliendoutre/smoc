@@ -71,73 +71,30 @@ void MX_USB_HOST_Process(void);
 /* USER CODE BEGIN 0 */
 
 int8_t buffer[2] = {0};
-int8_t ThresholdHigh = 20;
-int8_t ThresholdLow = -20;
 
 #define ABS(x) (x < 0) ? (-x) : x
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	int8_t xval, yval = 0x00;
+  int8_t xval, yval = 0x00;
 
-	xval = buffer[0];
-	yval = buffer[1];
+  xval = buffer[0];
+  yval = buffer[1];
 
-	set_values(buffer);
+  set_accelerometer_values(buffer);
 
-	if (ABS(xval) > 0) {
-		HAL_GPIO_TogglePin(GPIOD, LD5_Pin);
-	}
+  if (ABS(xval) > 0)
+  {
+    HAL_GPIO_TogglePin(GPIOD, LD5_Pin);
+  }
 
-	if (ABS(yval) > 0) {
-		HAL_GPIO_TogglePin(GPIOD, LD4_Pin);
-	}
+  if (ABS(yval) > 0)
+  {
+    HAL_GPIO_TogglePin(GPIOD, LD4_Pin);
+  }
 
-//	if ((ABS(xval)) > (ABS(yval)))
-//	{
-//		if (xval > ThresholdHigh)
-//		{
-//		  /* LED5 On */
-//		  HAL_GPIO_TogglePin(GPIOD, LD5_Pin);
-//		  // BSP_LED_On(LED5);
-//		  HAL_Delay(10);
-//		}
-//		else if (xval < ThresholdLow)
-//		{
-//		  /* LED4 On */
-//		  HAL_GPIO_TogglePin(GPIOD, LD4_Pin);
-//		  // BSP_LED_On(LED4);
-//		  HAL_Delay(10);
-//		}
-//		else
-//		{
-//		  HAL_Delay(10);
-//		}
-//	}
-//	else
-//	{
-//		if (yval < ThresholdLow)
-//		{
-//		  /* LED6 On */
-//		  // BSP_LED_On(LED6);
-//		  HAL_GPIO_TogglePin(GPIOD, LD6_Pin);
-//		  HAL_Delay(10);
-//		}
-//		else if (yval > ThresholdHigh)
-//		{
-//		  /* LED3 On */
-//		  // BSP_LED_On(LED3);
-//		  HAL_GPIO_TogglePin(GPIOD, LD3_Pin);
-//		  HAL_Delay(10);
-//		}
-//		else
-//		{
-//		  HAL_Delay(10);
-//		}
-//	}
-
-	// Restart receiving data on USART3
-	HAL_UART_Receive_IT(&huart3, buffer, 2);
+  // Restart receiving data on USART3
+  HAL_UART_Receive_IT(&huart3, buffer, 2);
 }
 /* USER CODE END 0 */
 
@@ -150,7 +107,6 @@ int main(void)
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
-  
 
   /* MCU Configuration--------------------------------------------------------*/
 
@@ -177,7 +133,7 @@ int main(void)
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
   // Start receiving data on USART3
-  HAL_UART_Receive_IT( &huart3, &buffer, 2 );
+  HAL_UART_Receive_IT(&huart3, &buffer, 2);
 
   /* USER CODE END 2 */
 
@@ -207,11 +163,11 @@ void SystemClock_Config(void)
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
   RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
-  /** Configure the main internal regulator output voltage 
+  /** Configure the main internal regulator output voltage
   */
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
-  /** Initializes the CPU, AHB and APB busses clocks 
+  /** Initializes the CPU, AHB and APB busses clocks
   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
@@ -225,10 +181,9 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  /** Initializes the CPU, AHB and APB busses clocks 
+  /** Initializes the CPU, AHB and APB busses clocks
   */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
@@ -278,7 +233,6 @@ static void MX_I2C1_Init(void)
   /* USER CODE BEGIN I2C1_Init 2 */
 
   /* USER CODE END I2C1_Init 2 */
-
 }
 
 /**
@@ -312,7 +266,6 @@ static void MX_I2S3_Init(void)
   /* USER CODE BEGIN I2S3_Init 2 */
 
   /* USER CODE END I2S3_Init 2 */
-
 }
 
 /**
@@ -345,7 +298,6 @@ static void MX_USART3_UART_Init(void)
   /* USER CODE BEGIN USART3_Init 2 */
 
   /* USER CODE END USART3_Init 2 */
-
 }
 
 /**
@@ -372,8 +324,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(OTG_FS_PowerSwitchOn_GPIO_Port, OTG_FS_PowerSwitchOn_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, LD4_Pin|LD3_Pin|LD5_Pin|LD6_Pin 
-                          |Audio_RST_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, LD4_Pin | LD3_Pin | LD5_Pin | LD6_Pin | Audio_RST_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : CS_I2C_SPI_Pin */
   GPIO_InitStruct.Pin = CS_I2C_SPI_Pin;
@@ -404,7 +355,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : SPI1_SCK_Pin SPI1_MISO_Pin */
-  GPIO_InitStruct.Pin = SPI1_SCK_Pin|SPI1_MISO_Pin;
+  GPIO_InitStruct.Pin = SPI1_SCK_Pin | SPI1_MISO_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -425,10 +376,9 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
   HAL_GPIO_Init(CLK_IN_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LD4_Pin LD3_Pin LD5_Pin LD6_Pin 
+  /*Configure GPIO pins : LD4_Pin LD3_Pin LD5_Pin LD6_Pin
                            Audio_RST_Pin */
-  GPIO_InitStruct.Pin = LD4_Pin|LD3_Pin|LD5_Pin|LD6_Pin 
-                          |Audio_RST_Pin;
+  GPIO_InitStruct.Pin = LD4_Pin | LD3_Pin | LD5_Pin | LD6_Pin | Audio_RST_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -445,7 +395,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_EVT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(MEMS_INT2_GPIO_Port, &GPIO_InitStruct);
-
 }
 
 /* USER CODE BEGIN 4 */
@@ -464,7 +413,7 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.
@@ -473,7 +422,7 @@ void Error_Handler(void)
   * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
-{ 
+{
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
      tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
