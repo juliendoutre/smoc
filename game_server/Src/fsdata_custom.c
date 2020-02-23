@@ -79,7 +79,8 @@ int fs_open_custom(struct fs_file *file, const char *name)
 	}
 	else if (strcmp(name, "/xbee_switch_to_api.html") == 0)
 	{
-		int r = xbee_AT_configure_API1();
+		// int r = xbee_AT_configure_API1();
+		int r = 500;
 
 		file->data = buffer;
 		if (r == 0)
@@ -97,8 +98,8 @@ int fs_open_custom(struct fs_file *file, const char *name)
 		file->data = ok;
 		len = strlen(ok);
 
-		wi.button_register_player = 1;
-		event_trigger(&wi.evt);
+		// wi.button_register_player = 1;
+		// event_trigger(&wi.evt);
 	}
 	else if (strcmp(name, "/!!") == 0)
 	{
