@@ -79,7 +79,7 @@ int fs_open_custom(struct fs_file *file, const char *name)
 	file->len = len;
 	file->index = len;
 	file->pextension = 0;
-	file->flags |= 0x04;
+	// file->flags |= 0x04;
 
 	return len;
 }
