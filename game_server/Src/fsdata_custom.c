@@ -11,11 +11,18 @@
 #include "web/includes/favicon.h"
 #include "web/includes/index.h"
 #include "web/includes/engine.h"
+#include "bum_player.h"
+#include "xbee.h"
 
 #define FS_ROOT 0
 
 const char ok[] = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"/></head><body><p>OK</p></body></html>";
 const char undefined_route_error[] = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"/></head><body><p>Error 404</p></body></html>";
+const char json_nil[] = "{}";
+char buffer[100];
+
+extern char json_orders[];
+extern WebInterface wi;
 
 int fs_open_custom(struct fs_file *file, const char *name)
 {
@@ -69,6 +76,51 @@ int fs_open_custom(struct fs_file *file, const char *name)
 		sprintf(str, "x: %d, y: %d", acc_x, acc_y);
 		file->data = str;
 		len = strlen(str);
+	}
+	else if (strcmp(name, "/xbee_switch_to_api.html") == 0)
+	{
+		int r = xbee_AT_configure_API1();
+
+		file->data = buffer;
+		if (r == 0)
+			len = sprintf(buffer, "SUCCESS");
+		else
+			len = sprintf(buffer, "ERROR %d", r);
+	}
+	else if (strcmp(name, "/xbee_log.html") == 0)
+	{
+		file->data = xbee_log_get();
+		len = xbee_log_len();
+	}
+	else if (strncmp(name, "/register_player", 16) == 0)
+	{
+		file->data = ok;
+		len = strlen(ok);
+
+		wi.button_register_player = 1;
+		event_trigger(&wi.evt);
+	}
+	else if (strcmp(name, "/!!") == 0)
+	{
+		len = strlen(json_orders);
+
+		if (len > 6)
+		{
+			strcat(json_orders, "{}]}");
+			len += 4;
+
+			file->data = (char *)malloc(len + 1);
+			file->flags |= 0x04; // Must be deleted later
+
+			strcpy((char *)file->data, json_orders);
+
+			strcpy(json_orders, "{\"L\":[");
+		}
+		else
+		{
+			file->data = json_nil;
+			len = strlen(json_nil);
+		}
 	}
 	else
 	{

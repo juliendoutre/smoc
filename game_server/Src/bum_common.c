@@ -1,6 +1,5 @@
 #include <bum_common.h>
 #include <xbee.h>
-
 #include <bum_private.h>
 
 void bum_notify_recv(uint8_t c)

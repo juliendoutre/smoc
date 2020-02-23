@@ -1,8 +1,6 @@
 #include <bum_player.h>
 #include <xbee.h>
-
 #include <bum_private.h>
-
 #include <stdio.h>
 #include <string.h>
 
