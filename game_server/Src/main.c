@@ -27,6 +27,9 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include "httpd.h"
+#include "bum_player.h"
+#include "accelerometer_handler.h"
+#include <string.h>
 
 /* USER CODE END Includes */
 
@@ -37,6 +40,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define PLAYER_NAME "Jean"
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -52,6 +56,11 @@ I2S_HandleTypeDef hi2s3;
 UART_HandleTypeDef huart3;
 
 /* USER CODE BEGIN PV */
+
+event e;
+
+#define TIM2_MS 10
+#define BUMPER_DT_MS 100
 
 /* USER CODE END PV */
 
@@ -96,6 +105,158 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   // Restart receiving data on USART3
   HAL_UART_Receive_IT(&huart3, buffer, 2);
 }
+
+// int _write(int file, char *ptr, int len)
+// {
+//   HAL_UART_Transmit(&huart6, (uint8_t *)ptr, len, 1000);
+//   return len;
+// }
+
+// void pwm_angle_to_registers(int angle)
+// {
+//   if (angle < -90)
+//     angle = -90;
+//   else if (angle > 90)
+//     angle = 90;
+
+//   // 100 counts / ms
+//   // -90 --> 0.75 ms
+//   //  90 --> 2.25 ms
+//   // 100 * (0.75 + 1,5/180 * (angle + 90))
+
+//   int pulse = 75 + (150 * (angle + 90)) / 180;
+//   int period = pulse + 2000;
+
+//   // Besoin de stopper le timer ? De reset ? d'attendre la fin d'un cycle ?
+//   // Non : shadow registers
+//   __HAL_TIM_SET_AUTORELOAD(&htim9, (period - 1));
+//   __HAL_TIM_SET_COMPARE(&htim9, TIM_CHANNEL_1, (pulse - 1));
+// }
+
+void bumper_signal_error(int x)
+{
+  HAL_GPIO_WritePin(LD3_GPIO_Port, LD5_Pin, 1); // RED
+
+  char buff[20];
+  sprintf(buff, "ERROR %d<br/>", x);
+
+  bum_log(buff);
+}
+
+void bumper_signal_debug(int x)
+{
+  HAL_GPIO_TogglePin(LD6_GPIO_Port, LD6_Pin); // BLUE
+}
+
+BumperProtocolPlayer bum_player;
+
+#define JSON_ORDERS_SIZE 500
+char json_orders[JSON_ORDERS_SIZE + 1];
+
+int bumper_game_step(uint8_t step, uint8_t param)
+{
+  int len = strlen(json_orders);
+  if (len > JSON_ORDERS_SIZE - 50)
+    return 0;
+
+  char msg[40];
+  msg[0] = 0;
+  switch (step)
+  {
+  case BUM_STEP_REGISTERED:
+    switch (param)
+    {
+    case 0: // internal error
+      strcpy(msg, "Internal Error");
+      break;
+    case 1: // OK
+      strcpy(msg, "OK registered as ");
+      strcat(msg, bum_player.name);
+      break;
+    case 2: // OK but already registered
+      strcpy(msg, "OK already as ");
+      strcat(msg, bum_player.name);
+      break;
+    case 3: // NO, too many players
+      strcpy(msg, "Too many players");
+      break;
+    case 4: // NO, game already started
+      strcpy(msg, "Too late");
+      break;
+    default:
+      strcpy(msg, "param ???");
+      break;
+    }
+    break;
+
+  case BUM_STEP_START:
+    strcpy(msg, "Playing as ");
+    strcat(msg, bum_player.name);
+    break;
+    break;
+
+  case BUM_STEP_RESULT:
+    break;
+
+  case BUM_STEP_END:
+    sprintf(msg, "Game Over");
+    break;
+
+  default:
+    strcpy(msg, "step ???");
+    break;
+  }
+
+  if (msg[0])
+  {
+    sprintf(json_orders + len, "{\"display\":[{\"id\":\"step\",\"x\":200,\"y\":-5,\"content\":\"%s\"}]},", msg);
+  }
+
+  return 1;
+}
+
+int bumper_game_new_player(uint8_t id, const char *name, uint32_t color)
+{
+  int len = strlen(json_orders);
+  if (len > JSON_ORDERS_SIZE - 50)
+    return 0;
+  sprintf(json_orders + len, "{\"new_player\":[{\"i\":%d,\"name\":\"%s\",\"color\": \"#%06X\"}]},", (unsigned int)id, name, (unsigned int)color);
+  return 1;
+}
+
+int bumper_game_player_move(uint8_t id, uint16_t x, uint16_t y, uint16_t s)
+{
+  int len = strlen(json_orders);
+  if (len > JSON_ORDERS_SIZE - 50)
+    return 0;
+  sprintf(json_orders + len, "{\"move\":[{\"i\":%d,\"x\":%d,\"y\":%d,\"a\":%d,\"s\":%d}]},", (unsigned int)id, (unsigned int)x, (unsigned int)y, 0, (unsigned int)s);
+  return 1;
+}
+
+int bumper_game_print(const char *msg)
+{
+  int len = strlen(json_orders);
+  if (len > JSON_ORDERS_SIZE - 50)
+    return 0;
+  sprintf(json_orders + len, "{\"display\":[{\"id\":\"score\",\"x\":10,\"y\":-5,\"content\":\"%s\"}]},", msg);
+  return 1;
+}
+
+void bumper_init_player()
+{
+  bum_player.game_step = bumper_game_step;
+  bum_player.game_new_player = bumper_game_new_player;
+  bum_player.game_player_move = bumper_game_player_move;
+  bum_player.game_print = bumper_game_print;
+
+  bum_player.error = bumper_signal_error;
+  bum_player.debug = bumper_signal_debug;
+
+  bum_init_player(&bum_player);
+}
+
+WebInterface wi;
+
 /* USER CODE END 0 */
 
 /**
@@ -132,6 +293,17 @@ int main(void)
   MX_USB_HOST_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
+
+  strcpy(bum_player.name, PLAYER_NAME);
+
+  // web_interface_init(&wi);
+
+  // MX_LWIP_Init_(0);
+
+  // HAL_TIM_Base_Start_IT(&htim2);
+
+  // event_init(&e);
+
   // Start receiving data on USART3
   HAL_UART_Receive_IT(&huart3, &buffer, 2);
 
@@ -139,7 +311,21 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+  // HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
+
+  // Start AD conversion
+  // HAL_ADC_Start(&hadc1);
+
+  // Start timer 9
+  // HAL_TIM_Base_Start(&htim9);
+  // Start PWM on channel 1, timer 9
+  // HAL_TIM_PWM_Start(&htim9, TIM_CHANNEL_1);
   httpd_init();
+
+  // bumper_init_player();
+
+  // strcpy(json_orders, "{\"L\":[");
 
   while (1)
   {
@@ -149,6 +335,44 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
     MX_LWIP_Process();
+
+    // bum_process_player();
+
+    // Execute buttons pushed in web interface
+    //   if (event_check(&wi.evt))
+    //   {
+    //     if (wi.button_register_player)
+    //     {
+    //       wi.button_register_player = 0;
+    //       bum_game_register(bum_player.name);
+    //     }
+
+    //     if (wi.button_acc)
+    //     {
+    //       wi.button_acc = 0;
+    //       bum_game_acceleration(wi.acc_x, wi.acc_y, 0);
+    //     }
+    //   }
+
+    //   if (event_check(&e)) // If the event has been triggered
+    //   {
+    //     bum_process(TIM2_MS);
+
+    //     static int N_BUMPER_DT_MS = 0;
+    //     N_BUMPER_DT_MS += TIM2_MS;
+    //     if (N_BUMPER_DT_MS >= BUMPER_DT_MS)
+    //     {
+    //       N_BUMPER_DT_MS = 0;
+    //     }
+
+    //     static int N500 = 0;
+    //     N500 += TIM2_MS;
+    //     if (N500 >= 500)
+    //     {
+    //       N500 = 0;
+    //       HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin); // ORANGE
+    //     }
+    //   }
   }
   /* USER CODE END 3 */
 }
