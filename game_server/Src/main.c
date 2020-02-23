@@ -71,8 +71,6 @@ void MX_USB_HOST_Process(void);
 /* USER CODE BEGIN 0 */
 
 int8_t buffer[2] = {0};
-int8_t ThresholdHigh = 20;
-int8_t ThresholdLow = -20;
 
 #define ABS(x) (x < 0) ? (-x) : x
 
